@@ -95,3 +95,4 @@ class TestUIAuthentication:
 
         # Проверяем что остались на странице логина
         login_page.assert_page_loaded()
+        
