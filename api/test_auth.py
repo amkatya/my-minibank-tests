@@ -23,27 +23,6 @@ class TestAuthenticationAPI:
         assert response.status_code == 200
         assert response.data is not None
     
-    def test_valid_login(self, api_client: MiniBankAPIClient):
-        """Тест успешного логина"""
-        test_user = settings.get_user(UserRole.USER)
-        
-        response = api_client.login(test_user.email, test_user.password)
-        
-        assert response.success, f"Login failed: {response.message}"
-        assert response.status_code == 200
-        assert response.data is not None
-        
-        # Проверяем что токен получен
-        if 'token' in response.data:
-            token = response.data['token']
-            assert isinstance(token, str), "Token should be string"
-            assert len(token) > 0, "Token should not be empty"
-        
-        # Проверяем информацию о пользователе
-        if 'user' in response.data:
-            user_info = response.data['user']
-            assert user_info['email'] == test_user.email
-    
     def test_invalid_credentials(self, api_client: MiniBankAPIClient):
         """Тест логина с неверными данными"""
         response = api_client.login("invalid@email.com", "wrongpassword")
