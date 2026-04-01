@@ -37,7 +37,8 @@ class AccountsPage(BasePage):
             "details_button": '[data-testid^="details-button-"]',
             "delete_button": '[data-testid^="delete-button-"]',
             "no_accounts": '[data-testid="no-accounts-message"]',
-            "error_message": '[data-testid="error-message"]'
+            "error_message": '[data-testid="error-message"]',
+            "owner_account": '[class="sc-eqNDNG buSLGG"]'
         })
 
     # --------------------------------------------------------------------
