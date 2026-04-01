@@ -16,11 +16,14 @@ import sys
 import base64
 from pathlib import Path
 from typing import Generator, Dict, Any, Callable, Optional
+from ui.pages.login_page import LoginPage
+from ui.pages.dashboard_page import DashboardPage
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.remote.webdriver import WebDriver
 import structlog
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -259,6 +262,21 @@ def driver(request) -> Generator[webdriver.Remote, None, None]:
 def wait(driver) -> WebDriverWait:
     """Явные ожидания для текущего драйвера с таймаутом из настроек."""
     return WebDriverWait(driver, settings.browser_config.element_wait_timeout)
+
+@pytest.fixture(scope="function")
+def ui_logged_in_admin(driver: WebDriver) -> DashboardPage:
+    """Логин под администратором и возврат DashboardPage."""
+    login_page = LoginPage(driver)
+    login_page.navigate_to()
+    login_page.assert_page_loaded()
+
+    test_user = settings.get_user(UserRole.ADMIN)
+    login_page.login(test_user.email, test_user.password)
+
+    dashboard_page = DashboardPage(driver)
+    dashboard_page.assert_page_loaded()
+
+    return dashboard_page
 
 # ──────────────────────────────────────────────────────────────────────────────
 # API ФИКСТУРЫ (клиент и быстрый логин ролей)
