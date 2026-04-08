@@ -26,7 +26,7 @@ class TestMyAuthAPI:
         assert isinstance(token, str), "Token should be string"
         assert len(token) > 0, 'Token should not be empty'
 
-        # Проверяем наличие пользователя и соответсвие email и роли
+        # Проверяем наличие пользователя и соответствие email и роли
         assert 'user' in response.data, "User missing in response"
         user_info = response.data['user']
         assert user_info['email'] == test_user.email
@@ -71,7 +71,7 @@ class TestMyAuthAPI:
         assert response.success
         assert response.status_code == 200
 
-        # Проверяем наличие пользователя и соответсвие роли
+        # Проверяем наличие пользователя и соответствие роли
         assert 'user' in response.data, "User missing in response"
         user_info = response.data['user']
         assert user_info['role'] == test_user.role.value

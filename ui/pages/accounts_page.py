@@ -120,4 +120,23 @@ class AccountsPage(BasePage):
         
         if message:
             error_text = self.get_text(self.selectors["error_message"])
-            assert message in error_text, f"Expected '{message}' in error text '{error_text}'" 
+            assert message in error_text, f"Expected '{message}' in error text '{error_text}'"
+
+    def owner_block_exists(self):
+        """Проверяет отображение блока владельца счёта"""
+        all_cards = self.find_elements(self.selectors["account_card"])
+
+        assert len(all_cards) > 0, "No account cards found"
+
+        first_card = all_cards[0]
+
+        # Ищем div, у которого есть два дочерних div с непустым текстом
+        owner_block = first_card.find_elements(By.XPATH, """
+            .//div[
+                count(./div) = 2 
+                and string-length(normalize-space(./div[1]/text())) > 0
+                and string-length(normalize-space(./div[2]/text())) > 0
+            ]
+        """)
+
+        return len(owner_block) > 0
