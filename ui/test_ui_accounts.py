@@ -4,7 +4,6 @@ UI тесты счетов
 
 import pytest
 
-
 from config.settings import settings, UserRole
 
 from ui.pages.login_page import LoginPage
@@ -15,12 +14,13 @@ import random
 import structlog
 import re
 
+logger = structlog.get_logger(__name__)
+
 
 @pytest.mark.ui
 @pytest.mark.accounts
 class TestUIAccounts:
     """UI тесты счетов"""
-    logger = structlog.get_logger(__name__)
 
     def test_view_user_accounts(self, driver):
         """Тест просмотра информации о счете пользователя"""
@@ -45,7 +45,7 @@ class TestUIAccounts:
 
         # Выводим информацию о первой карточке
         cards = accounts_page.get_account_cards()
-        self.logger.info(f"First account card details: {cards[0]}")
+        logger.info(f"First account card details: {cards[0]}")
 
     def test_user_account_permissions(self, driver):
         """Тест прав пользователя USER на странице My Accounts"""
@@ -114,7 +114,7 @@ class TestUIAccounts:
         # Переходим на страницу My Accounts
         dashboard_page.open_accounts()
         accounts_page = AccountsPage(driver)
-        accounts_page.is_loaded()
+        accounts_page.assert_page_loaded()
 
         # Считаем количество карточек счетов до создания нового счёта
         accounts_page.wait_for_element("account_card", 5)
@@ -138,7 +138,7 @@ class TestUIAccounts:
         # Обновляем страницу и переходим в My Accounts
         accounts_page.refresh_page()
         dashboard_page.open_accounts()
-        accounts_page.is_loaded()
+        accounts_page.assert_page_loaded()
 
         # Считаем количество карточек счетов после создания счёта
         accounts_page.wait_for_element("account_card", 5)
