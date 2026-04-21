@@ -17,8 +17,8 @@ logger = structlog.get_logger(__name__)
 
 @pytest.mark.ui
 @pytest.mark.users
-class TestUIAccounts:
-    """UI тесты счетов"""
+class TestUIUsers:
+    """UI тесты управления пользователями"""
 
     def test_admin_can_view_users(self, driver):
         """Тест отображания списка пользователей для Admin"""
