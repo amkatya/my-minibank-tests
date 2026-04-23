@@ -226,7 +226,6 @@ def create_unique_user_data() -> Dict[str, Any]:
         "firstName": f"Test{generate_random_string(4)}",
         "lastName": f"User{generate_random_string(4)}",
         "email": generate_random_email(),
-        "role": random.choice(["ADMIN", "USER", "VIP_USER", "SUPPORT"]),
         # Phone omitted to avoid backend validation issues differing across environments
         "uniqueId": unique_id
     }

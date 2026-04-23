@@ -2,7 +2,6 @@
 Страница пользователей для автотестов MiniBank
 Обрабатывает действия по управлению пользователями
 """
-import time
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -34,8 +33,8 @@ class UsersPage(BasePage):
             "password_input": 'input[name = "password"]',
             "cancel_create": 'h2 + form button[type="button"]',
             "submit_create": 'h2 + form button[type="submit"]',
-            "users_table_header": 'div[style*="grid-template-columns"][style*="font-weight: 600"]',
-            "users_table_rows": 'div[style*="grid-template-columns"]:not([style*="font-weight: 600"])',
+            "users_table_header": 'div[style*="grid-template-columns"]:first-of-type',
+            "users_table_rows": 'div[style*="grid-template-columns"]:not(:first-of-type)'
 
         })
 
@@ -105,3 +104,4 @@ class UsersPage(BasePage):
             EC.invisibility_of_element(element)
         )
         assert not self.is_element_visible(selector), f"Element {selector} is visible"
+

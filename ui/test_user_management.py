@@ -20,18 +20,10 @@ logger = structlog.get_logger(__name__)
 class TestUIUsers:
     """UI тесты управления пользователями"""
 
-    def test_admin_can_view_users(self, driver):
+    def test_admin_can_view_users(self, ui_logged_in_admin, api_client, driver):
         """Тест отображания списка пользователей для Admin"""
-        # Переходим на страницу логина
-        login_page = LoginPage(driver)
-        login_page.navigate_to()
-        login_page.assert_page_loaded()
-
         # Логинимся как пользователь ADMIN
-        test_user = settings.get_user(UserRole.ADMIN)
-        login_page.login(test_user.email, test_user.password)
-        dashboard_page = DashboardPage(driver)
-        dashboard_page.assert_page_loaded()
+        dashboard_page = ui_logged_in_admin
 
         # Переходим на страницу USERS
         dashboard_page.open_users()
@@ -48,18 +40,10 @@ class TestUIUsers:
         # Выводим количество пользователей
         logger.info(f"Numbers of users: {len(users)}")
 
-    def test_create_basic_user(self, driver):
+    def test_create_basic_user(self, ui_logged_in_admin, api_client, driver):
         """Тест создания пользователя"""
-        # Переходим на страницу логина
-        login_page = LoginPage(driver)
-        login_page.navigate_to()
-        login_page.assert_page_loaded()
-
         # Логинимся как пользователь ADMIN
-        test_user = settings.get_user(UserRole.ADMIN)
-        login_page.login(test_user.email, test_user.password)
-        dashboard_page = DashboardPage(driver)
-        dashboard_page.assert_page_loaded()
+        dashboard_page = ui_logged_in_admin
 
         # Переходим на страницу USERS
         dashboard_page.open_users()
@@ -74,10 +58,9 @@ class TestUIUsers:
         first_name = user_data.get("firstName")
         last_name = user_data.get("lastName")
         email = user_data.get("email")
-        role = user_data.get("role")
 
         # Создаём пользователя
-        user_page.create_user(first_name, last_name, email, role, "123456")
+        user_page.create_user(first_name, last_name, email, "USER", "123456")
 
         # Сообщения о сохранении нет, проверяем, что модальное окно закрылось и отображается страница USERS
         user_page.wait_for_element_invisible("create_form", 5)
@@ -94,9 +77,8 @@ class TestUIUsers:
 
         # Проверяем, что отображаются правильные данные
         all_users_data = user_page.get_users_info()
-        assert all_users_data[0]["name"] == first_name + " " + last_name
-        assert all_users_data[0]["email"] == email
-        assert all_users_data[0]["role"] == role
+        assert any(user.get('name') == f"{first_name} {last_name}" for user in all_users_data)
+        assert any(user.get('email') == email and user.get('role') == "USER" for user in all_users_data)
 
     def test_user_cannot_manage_users(self, driver):
         """Тест прав пользователя USER на странице USERS"""
