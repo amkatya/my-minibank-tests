@@ -13,7 +13,7 @@ from utils.api_client import MiniBankAPIClient
 from ui.pages.login_page import LoginPage
 from ui.pages.dashboard_page import DashboardPage
 from ui.pages.transfers_page import TransfersPage
-
+from decimal import Decimal
 
 @pytest.mark.ui
 @pytest.mark.transfers
@@ -79,9 +79,9 @@ def test_internal_transfer_between_own_accounts(driver, user_with_two_accounts, 
 
     # Запоминаем балансы счетов до перевода
     response_1 = api_client.get_account_balance(source_account["id"])
-    balance_before_1 = response_1.data["balance"]
+    source_balance_before = response_1.data["balance"]
     response_2 = api_client.get_account_balance(target_account["id"])
-    balance_before_2 = response_2.data["balance"]
+    target_balance_before = response_2.data["balance"]
 
     # Переходим к переводам
     dashboard_page = DashboardPage(driver)
@@ -92,7 +92,7 @@ def test_internal_transfer_between_own_accounts(driver, user_with_two_accounts, 
     transfers_page.assert_page_loaded()
 
     # Выполняем перевод
-    transfer_amount = 50.0
+    transfer_amount = Decimal("50.00")
     description = "UI Test: Transfer between own accounts"
 
     transfers_page.create_internal_transfer(
@@ -110,13 +110,15 @@ def test_internal_transfer_between_own_accounts(driver, user_with_two_accounts, 
 
     # Запоминаем балансы счетов после перевода и проверяем изменения
     response_3 = api_client.get_account_balance(source_account["id"])
-    balance_after_1 = response_3.data["balance"]
+    source_balance_after = response_3.data["balance"]
     response_4 = api_client.get_account_balance(target_account["id"])
-    balance_after_2 = response_4.data["balance"]
+    target_balance_after = response_4.data["balance"]
 
-    assert balance_before_1 - balance_after_1 == 50
-    assert balance_before_2 + balance_after_2 == 50
+    assert source_balance_before - source_balance_after == 50
+    assert target_balance_before + target_balance_after == 50
 
+@pytest.mark.ui
+@pytest.mark.transfers
 def test_transfer_updates_balances(driver, user_with_two_accounts, api_client):
     """Тест проверки балансов после перевода между своими счетами"""
     test_data = user_with_two_accounts
@@ -132,9 +134,9 @@ def test_transfer_updates_balances(driver, user_with_two_accounts, api_client):
 
     # Запоминаем балансы счетов до перевода
     response_1 = api_client.get_account_balance(source_account["id"])
-    balance_before_1 = response_1.data["balance"]
+    source_balance_before = response_1.data["balance"]
     response_2 = api_client.get_account_balance(target_account["id"])
-    balance_before_2 = response_2.data["balance"]
+    target_balance_before = response_2.data["balance"]
 
     # Переходим к переводам
     dashboard_page = DashboardPage(driver)
@@ -145,7 +147,7 @@ def test_transfer_updates_balances(driver, user_with_two_accounts, api_client):
     transfers_page.assert_page_loaded()
 
     # Выполняем перевод
-    transfer_amount = 150.0
+    transfer_amount = Decimal("150.00")
     description = "UI Test: Transfer between own accounts with updates balances"
 
     transfers_page.create_internal_transfer(
@@ -163,13 +165,15 @@ def test_transfer_updates_balances(driver, user_with_two_accounts, api_client):
 
     # Запоминаем балансы счетов после перевода и проверяем изменения
     response_3 = api_client.get_account_balance(source_account["id"])
-    balance_after_1 = response_3.data["balance"]
+    source_balance_after = response_3.data["balance"]
     response_4 = api_client.get_account_balance(target_account["id"])
-    balance_after_2 = response_4.data["balance"]
+    target_balance_after = response_4.data["balance"]
 
-    assert balance_before_1 - balance_after_1 == 150
-    assert balance_before_2 + balance_after_2 == 150
+    assert source_balance_before - source_balance_after == 150
+    assert target_balance_before + target_balance_after == 150
 
+@pytest.mark.ui
+@pytest.mark.transfers
 def test_transfer_insufficient_funds(driver, user_with_two_accounts, api_client):
     """Тест некорректного перевода между своими счетами"""
     test_data = user_with_two_accounts
@@ -185,9 +189,9 @@ def test_transfer_insufficient_funds(driver, user_with_two_accounts, api_client)
 
     # Запоминаем балансы счетов до попытки перевода
     response_1 = api_client.get_account_balance(source_account["id"])
-    balance_before_1 = response_1.data["balance"]
+    source_balance_before = response_1.data["balance"]
     response_2 = api_client.get_account_balance(target_account["id"])
-    balance_before_2 = response_2.data["balance"]
+    target_balance_before = response_2.data["balance"]
 
     # Переходим к переводам
     dashboard_page = DashboardPage(driver)
@@ -198,7 +202,7 @@ def test_transfer_insufficient_funds(driver, user_with_two_accounts, api_client)
     transfers_page.assert_page_loaded()
 
     # Выполняем перевод со счёта, на котором нулевой баланс
-    transfer_amount = 100.0
+    transfer_amount = Decimal("100.00")
     description = "UI Test: Incorrect transfer between own accounts"
 
     transfers_page.create_internal_transfer(
@@ -212,9 +216,9 @@ def test_transfer_insufficient_funds(driver, user_with_two_accounts, api_client)
 
     # Запоминаем балансы счетов после перевода и проверяем, что они не изменились
     response_3 = api_client.get_account_balance(source_account["id"])
-    balance_after_1 = response_3.data["balance"]
+    source_balance_after = response_3.data["balance"]
     response_4 = api_client.get_account_balance(target_account["id"])
-    balance_after_2 = response_4.data["balance"]
+    target_balance_after = response_4.data["balance"]
 
-    assert balance_before_1 == balance_after_1
-    assert balance_before_2 == balance_after_2
+    assert source_balance_before == source_balance_after
+    assert target_balance_before == target_balance_after
