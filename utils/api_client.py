@@ -573,7 +573,7 @@ class MiniBankAPIClient:
         Returns:
             APIResponse: Account balance response
         """
-        return self.get(f"/accounts/{account_id}")
+        return self.get(f"/accounts/{account_id}/balance")
     
     def get_dashboard_data(self) -> APIResponse:
         """
