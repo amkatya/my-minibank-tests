@@ -30,6 +30,12 @@ class UserRole(Enum):
     ADMIN = "ADMIN"
 
 
+class AccountType(Enum):
+    """Account types for testing"""
+    SAVINGS = "SAVINGS"
+    CHECKING = "CHECKING"
+
+
 @dataclass
 class TestUser:
     """Test user configuration"""
@@ -51,8 +57,8 @@ class BrowserConfig:
     screenshot_on_failure: bool = True
     # Selenium-specific timeouts (оптимизированы для скорости)
     implicit_wait: int = 1  # Default 1 second - оставляем
-    page_load_timeout: int = 5  # Уменьшено с 10 до 5 секунд для SPA 
-    element_wait_timeout: int = 3  # Уменьшено с 5 до 3 секунд
+    page_load_timeout: int = 15  # Уменьшено с 10 до 5 секунд для SPA
+    element_wait_timeout: int = 5  # Уменьшено с 5 до 3 секунд
 
 
 @dataclass

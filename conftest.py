@@ -72,6 +72,15 @@ def _get_browser_options(browser_name: str, headless: bool = True):
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
+        options.add_experimental_option(
+            "prefs",
+            {
+                "credentials_enable_service": False,
+                "profile.password_manager_enabled": False,
+            },
+        )
+        options.add_argument("--disable-notifications")
+        options.add_argument("--disable-features=PasswordCheck")
         options.page_load_strategy = "eager"
         return options
     elif browser_name.lower() == "firefox":
@@ -251,10 +260,14 @@ def driver(request) -> Generator[webdriver.Remote, None, None]:
 
     request.node._driver = driver_instance
 
+    logger.info("=== DRIVER CREATED ===")
     yield driver_instance
+
+    logger.info("=== DRIVER QUIT START ===")
 
     try:
         driver_instance.quit()
+        logger.info("=== DRIVER QUIT SUCCESS ===")
     except Exception as e:
         logger.warning(f"Ошибка при закрытии WebDriver: {e}")
 
@@ -272,6 +285,21 @@ def ui_logged_in_admin(driver: WebDriver) -> DashboardPage:
     login_page.assert_page_loaded()
 
     test_user = settings.get_user(UserRole.ADMIN)
+    login_page.login(test_user.email, test_user.password)
+
+    dashboard_page = DashboardPage(driver)
+    dashboard_page.assert_page_loaded()
+
+    return dashboard_page
+
+@pytest.fixture(scope="function")
+def ui_logged_in_user(driver: WebDriver) -> DashboardPage:
+    """Логин под пользователем USER и возврат DashboardPage."""
+    login_page = LoginPage(driver)
+    login_page.navigate_to()
+    login_page.assert_page_loaded()
+
+    test_user = settings.get_user(UserRole.USER)
     login_page.login(test_user.email, test_user.password)
 
     dashboard_page = DashboardPage(driver)

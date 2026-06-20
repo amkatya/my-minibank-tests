@@ -503,4 +503,32 @@ class BasePage(ABC):
         """Очищает поле ввода"""
         element = self.wait_for_element(selector)
         element.clear()
-        self.logger.info(f"Cleared input: {selector}") 
+        self.logger.info(f"Cleared input: {selector}")
+
+    # ------------------------------------------------------------------
+    # Методы навигации (по тексту кнопок)
+    # ------------------------------------------------------------------
+    def open_overview(self):
+        self.click_element_by_text("button", "Overview")
+
+    def open_accounts(self):
+        self.click_element_by_text("button", "Accounts")
+
+    def open_transfers(self):
+        self.click_element_by_text("button", "Transfers")
+
+    def open_transactions(self):
+        self.click_element_by_text("button", "History")
+
+    def open_notifications(self):
+        self.click_element_by_text("button", "Notifications")
+
+    def open_users(self):
+        self.click_element_by_text("button", "Users")
+
+    def logout(self):
+        # На больших экранах текст 'Logout', на маленьких — символ стрелки
+        try:
+            self.click_element_by_text("button", "Logout", partial=False)
+        except Exception:
+            self.click_element_by_text("button", "↗")
