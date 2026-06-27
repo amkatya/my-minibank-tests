@@ -8,12 +8,36 @@ import pytest
 from config.settings import settings, UserRole
 from ui.pages.login_page import LoginPage
 from ui.pages.dashboard_page import DashboardPage
+import time
 
 
 @pytest.mark.ui
 @pytest.mark.auth
 class TestUIAuthentication:
     """UI тесты аутентификации"""
+
+    @pytest.fixture(autouse=True)
+    def wait_between_tests(self, driver):
+        """Очистка состояния между тестами"""
+        # Очищаем состояние ДО теста
+        try:
+            driver.delete_all_cookies()
+            driver.execute_script("window.localStorage.clear();")
+            driver.execute_script("window.sessionStorage.clear();")
+        except Exception:
+            pass
+
+        yield
+
+        # Очищаем состояние ПОСЛЕ теста
+        time.sleep(0.5)
+        try:
+            driver.delete_all_cookies()
+            driver.execute_script("window.localStorage.clear();")
+            driver.execute_script("window.sessionStorage.clear();")
+        except Exception:
+            pass
+        time.sleep(0.3)  # Даем время на очистку
 
     def test_login_with_vip_user(self, driver):
         """Тест логина VIP пользователя"""

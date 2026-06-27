@@ -72,6 +72,19 @@ def _get_browser_options(browser_name: str, headless: bool = True):
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
+        # ОПЦИИ ДЛЯ СТАБИЛЬНОСТИ:
+        options.add_argument("--disable-gpu")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-web-security")
+        options.add_argument("--disable-features=VizDisplayCompositor")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("--disable-background-timer-throttling")
+        options.add_argument("--disable-backgrounding-occluded-windows")
+        options.add_argument("--disable-renderer-backgrounding")
+        options.add_argument("--disable-ipc-flooding-protection")
+        options.add_argument("--disable-cache")
+        options.add_argument("--disable-application-cache")
         options.add_experimental_option(
             "prefs",
             {
@@ -121,6 +134,9 @@ def _create_webdriver(browser_name: str, headless: bool = True):
 
     driver.implicitly_wait(0)
     driver.set_page_load_timeout(settings.browser_config.page_load_timeout)
+
+    # Скрипт таймаут
+    driver.set_script_timeout(30)
 
     return driver
 
@@ -260,17 +276,36 @@ def driver(request) -> Generator[webdriver.Remote, None, None]:
 
     request.node._driver = driver_instance
 
-    logger.info("=== DRIVER CREATED ===")
     yield driver_instance
 
-    logger.info("=== DRIVER QUIT START ===")
-
     try:
+        # Закрываем все окна перед закрытием драйвера
+        try:
+            driver_instance.close()
+        except Exception:
+            pass
+
+        # Очищаем куки
+        try:
+            driver_instance.delete_all_cookies()
+        except Exception:
+            pass
+
         driver_instance.quit()
-        logger.info("=== DRIVER QUIT SUCCESS ===")
+        
     except Exception as e:
         logger.warning(f"Ошибка при закрытии WebDriver: {e}")
 
+@pytest.fixture(autouse=True)
+def clear_browser_state(driver):
+    """Очищает состояние браузера перед каждым тестом"""
+    yield
+    # После теста
+    try:
+        driver.execute_script("window.localStorage.clear();")
+        driver.execute_script("window.sessionStorage.clear();")
+    except Exception:
+        pass
 
 @pytest.fixture(scope="function")
 def wait(driver) -> WebDriverWait:

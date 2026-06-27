@@ -22,6 +22,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementNotInteractableException
 from abc import ABC, abstractmethod
 import structlog
+import time
 
 from config.settings import settings
 from utils.helpers import wait_for_condition, retry_on_failure
@@ -117,11 +118,32 @@ class BasePage(ABC):
         )
         self.logger.info(f"URL changed from {current_url} to {self.driver.current_url}")
     
-    def navigate_to(self, path: str = "") -> None:
-        """Переходит на конкретный путь страницы"""
+    # def navigate_to(self, path: str = "") -> None:
+    #     """Переходит на конкретный путь страницы"""
+    #     url = self.settings.get_page_url(path)
+    #     self.logger.info(f"Navigating to: {url}")
+    #     self.driver.get(url)
+
+    def navigate_to(self, path: str = "", retries: int = 3) -> None:
+        """Переходит на конкретный путь страницы с повторными попытками"""
         url = self.settings.get_page_url(path)
         self.logger.info(f"Navigating to: {url}")
-        self.driver.get(url)
+
+        for attempt in range(retries):
+            try:
+                self.driver.get(url)
+                return
+            except TimeoutException as e:
+                if attempt < retries - 1:
+                    self.logger.warning(f"Timeout on attempt {attempt + 1}, retrying...")
+                    time.sleep(1)
+                    # Очищаем куки и перезагружаем сессию
+                    try:
+                        self.driver.delete_all_cookies()
+                    except Exception:
+                        pass
+                else:
+                    raise e
     
     def wait_for_load_state(self, state: str = "complete", timeout: Optional[int] = None) -> None:
         """Ожидает достижения страницей определенного состояния загрузки"""
