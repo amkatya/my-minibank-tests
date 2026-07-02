@@ -292,7 +292,7 @@ def driver(request) -> Generator[webdriver.Remote, None, None]:
             pass
 
         driver_instance.quit()
-        
+
     except Exception as e:
         logger.warning(f"Ошибка при закрытии WebDriver: {e}")
 

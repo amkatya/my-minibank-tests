@@ -15,7 +15,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from typing import Optional
-# from typing import List
 import structlog
 import time
 from selenium.webdriver.support.ui import Select
@@ -121,7 +120,7 @@ class TransfersPage(BasePage):
         """Создает внутренний перевод между собственными счетами."""
         try:
             self.click_element(self.selectors["my_account_button"])
-        except:
+        except Exception:
             pass  # Кнопка может уже быть выбрана
         
         self.select_from_account(from_account)
@@ -139,7 +138,7 @@ class TransfersPage(BasePage):
         """Создает внешний перевод на счет другому пользователю"""
         try:
             self.click_element(self.selectors["to_external_account_button"])
-        except:
+        except Exception:
             pass  # Кнопка может уже быть выбрана
 
         self.select_from_account(from_account)
@@ -233,4 +232,4 @@ class TransfersPage(BasePage):
                 return
             except:
                 continue
-        raise AssertionError("Error message not visible") 
+        raise AssertionError("Error message not visible")

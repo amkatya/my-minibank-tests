@@ -199,8 +199,10 @@ def test_external_transfer_checking(driver, make_user_with_account, api_client):
 
     # Запоминаем балансы счетов до перевода
     response_1 = api_client.get_account_balance(sender_account["id"])
+    assert response_1.success, response_1.message
     sender_balance_before = response_1.data["balance"]
     response_2 = api_client.get_account_balance(recipient_account["id"])
+    assert response_2.success, response_2.message
     recipient_balance_before = response_2.data["balance"]
 
     # Вход через UI
@@ -233,12 +235,19 @@ def test_external_transfer_checking(driver, make_user_with_account, api_client):
 
     # Сохраняем балансы счетов после перевода
     response_3 = api_client.get_account_balance(sender_account["id"])
+    assert response_3.success, response_3.message
     sender_balance_after = response_3.data["balance"]
     response_4 = api_client.get_account_balance(recipient_account["id"])
+    assert response_4.success, response_4.message
     recipient_balance_after = response_4.data["balance"]
 
+    # Получаем размер комиссии
+    response_fee = api_client.get_fee_rules()
+
+    user_fee = response_fee.data["rules"]["external"]["USER"]
+    fee = Decimal(str(user_fee))
+
     # Проверяем, что баланы счетов изменились учитывая комиссию
-    fee = Decimal("5.00")
     assert sender_balance_before - sender_balance_after == transfer_amount + fee
     assert recipient_balance_after - recipient_balance_before == transfer_amount
 
@@ -258,8 +267,10 @@ def test_external_transfer_savings_checking(driver, make_user_with_account, api_
 
     # Запоминаем балансы счетов до перевода
     response_1 = api_client.get_account_balance(sender_account["id"])
+    assert response_1.success, response_1.message
     sender_balance_before = response_1.data["balance"]
     response_2 = api_client.get_account_balance(recipient_account["id"])
+    assert response_2.success, response_2.message
     recipient_balance_before = response_2.data["balance"]
 
     # Вход через UI
@@ -292,12 +303,19 @@ def test_external_transfer_savings_checking(driver, make_user_with_account, api_
 
     # Сохраняем балансы счетов после перевода
     response_3 = api_client.get_account_balance(sender_account["id"])
+    assert response_3.success, response_3.message
     sender_balance_after = response_3.data["balance"]
     response_4 = api_client.get_account_balance(recipient_account["id"])
+    assert response_4.success, response_4.message
     recipient_balance_after = response_4.data["balance"]
 
+    #Получаем размер комиссии
+    response_fee = api_client.get_fee_rules()
+
+    user_fee = response_fee.data["rules"]["external"]["USER"]
+    fee = Decimal(str(user_fee))
+
     # Проверяем, что баланы счетов изменились учитывая комиссию
-    fee = Decimal("5.00")
     assert sender_balance_before - sender_balance_after == transfer_amount + fee
     assert recipient_balance_after - recipient_balance_before == transfer_amount
 
@@ -317,8 +335,10 @@ def test_transfer_exceeding_daily_limit(driver, make_user_with_account, api_clie
 
     # Запоминаем балансы счетов до перевода
     response_1 = api_client.get_account_balance(sender_account["id"])
+    assert response_1.success, response_1.message
     sender_balance_before = response_1.data["balance"]
     response_2 = api_client.get_account_balance(recipient_account["id"])
+    assert response_2.success, response_2.message
     recipient_balance_before = response_2.data["balance"]
 
     # Вход через UI
@@ -351,8 +371,10 @@ def test_transfer_exceeding_daily_limit(driver, make_user_with_account, api_clie
 
     # Сохраняем балансы счетов после попытки перевода
     response_3 = api_client.get_account_balance(sender_account["id"])
+    assert response_3.success, response_3.message
     sender_balance_after = response_3.data["balance"]
     response_4 = api_client.get_account_balance(recipient_account["id"])
+    assert response_4.success, response_4.message
     recipient_balance_after = response_4.data["balance"]
 
     # Проверяем, что баланы счетов не изменились
@@ -375,8 +397,10 @@ def test_two_external_transfers(driver, make_user_with_account, api_client):
 
     # Запоминаем балансы счетов до перевода
     response_1 = api_client.get_account_balance(sender_account["id"])
+    assert response_1.success, response_1.message
     sender_balance_before = response_1.data["balance"]
     response_2 = api_client.get_account_balance(recipient_account["id"])
+    assert response_2.success, response_2.message
     recipient_balance_before = response_2.data["balance"]
 
     # Вход через UI
@@ -409,12 +433,19 @@ def test_two_external_transfers(driver, make_user_with_account, api_client):
 
     # Сохраняем балансы счетов после первого перевода
     response_3 = api_client.get_account_balance(sender_account["id"])
+    assert response_3.success, response_3.message
     sender_balance_after_first_transfer = response_3.data["balance"]
     response_4 = api_client.get_account_balance(recipient_account["id"])
+    assert response_4.success, response_4.message
     recipient_balance_after_first_transfer = response_4.data["balance"]
 
+    # Получаем размер комиссии
+    response_fee = api_client.get_fee_rules()
+
+    user_fee = response_fee.data["rules"]["external"]["USER"]
+    fee = Decimal(str(user_fee))
+
     # Проверяем, что баланы счетов изменились учитывая комиссию
-    fee = Decimal("5.00")
     assert sender_balance_before - sender_balance_after_first_transfer == transfer_amount + fee
     assert recipient_balance_after_first_transfer - recipient_balance_before == transfer_amount
 
@@ -434,11 +465,18 @@ def test_two_external_transfers(driver, make_user_with_account, api_client):
 
     # Сохраняем балансы счетов после первого перевода
     response_5 = api_client.get_account_balance(sender_account["id"])
+    assert response_5.success, response_5.message
     sender_balance_after_second_transfer = response_5.data["balance"]
     response_6 = api_client.get_account_balance(recipient_account["id"])
+    assert response_6.success, response_6.message
     recipient_balance_after_second_transfer = response_6.data["balance"]
 
+    # Получаем размер комиссии
+    response_fee = api_client.get_fee_rules()
+
+    user_fee = response_fee.data["rules"]["external"]["USER"]
+    fee = Decimal(str(user_fee))
+
     # Проверяем, что баланы счетов изменились учитывая комиссию
-    fee = Decimal("5.00")
     assert sender_balance_after_first_transfer - sender_balance_after_second_transfer == transfer_amount + fee
     assert recipient_balance_after_second_transfer - recipient_balance_after_first_transfer == transfer_amount
