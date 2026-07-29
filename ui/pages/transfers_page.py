@@ -41,7 +41,10 @@ class TransfersPage(BasePage):
             "submit_button": 'button[type="submit"]',
             "success_message": '[class*="success"], [role="alert"]',
             "error_message": '[class*="error"], [role="alert"]',
-            "my_account_button": '[data-testid="transfer-type-my-account"]'
+            "my_account_button": '//button[contains(., "Transfer to My Account")]',
+            "to_external_account_button": '//button[contains(., "Transfer to External Account")]',
+            "to_external_account_input": '//label[text()="External Account Number"]/following-sibling::input',
+            "account_found_message": 'h4'
         })
 
     # ------------------------------------------------------------------
@@ -92,6 +95,12 @@ class TransfersPage(BasePage):
         select = Select(from_select)
         select.select_by_value(account_id)
 
+    def reset_select_from_account(self):
+        """Сбрасывает значение исходного счёта."""
+        from_select = self.wait_for_element(self.selectors["from_account_select"])
+        select = Select(from_select)
+        select.select_by_visible_text("Select source account")
+
     def select_to_account(self, account_id: str):
         """Выбирает целевой счёт."""
         self._wait_for_select_option(self.selectors["to_account_select"], account_id)
@@ -111,11 +120,29 @@ class TransfersPage(BasePage):
         """Создает внутренний перевод между собственными счетами."""
         try:
             self.click_element(self.selectors["my_account_button"])
-        except:
+        except Exception:
             pass  # Кнопка может уже быть выбрана
         
         self.select_from_account(from_account)
         self.select_to_account(to_account)
+        self.enter_amount(amount)
+        if description:
+            self.enter_description(description)
+        self.submit_transfer()
+
+    def input_to_external_account(self, account_id: str):
+        """Вводит номер внешнего счёта."""
+        self.fill_input(self.selectors["to_external_account_input"], account_id)
+
+    def create_external_transfer(self, from_account: str, to_external_account_input: str, amount: float, description: str = ""):
+        """Создает внешний перевод на счет другому пользователю"""
+        try:
+            self.click_element(self.selectors["to_external_account_button"])
+        except Exception:
+            pass  # Кнопка может уже быть выбрана
+
+        self.select_from_account(from_account)
+        self.input_to_external_account(to_external_account_input)
         self.enter_amount(amount)
         if description:
             self.enter_description(description)
@@ -162,7 +189,7 @@ class TransfersPage(BasePage):
                     except:
                         continue
                 if not result["success"]:
-                    error_indicators = ["Transfer failed", "error", "not found", "insufficient", "failed"]
+                    error_indicators = ["Transfer failed", "error", "not found", "insufficient", "failed", "exceeds"]
                     for indicator in error_indicators:
                         try:
                             if self.wait_for_element_by_text("*", indicator, timeout=1):
@@ -205,4 +232,4 @@ class TransfersPage(BasePage):
                 return
             except:
                 continue
-        raise AssertionError("Error message not visible") 
+        raise AssertionError("Error message not visible")

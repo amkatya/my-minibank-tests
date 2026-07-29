@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from typing import List
 import structlog
+import re
 
 from .base_page import BasePage
 
@@ -89,6 +90,24 @@ class AccountsPage(BasePage):
         cards = self.find_elements(self.selectors["account_card"])
         return [card.text for card in cards]
 
+    def get_account_number(self, index=0):
+        """Получает номер счета по индексу карточки"""
+        cards = self.find_elements("account_card")
+        card = cards[index]
+
+        account_number = card.find_element(
+            By.XPATH,
+            './/div[string-length(normalize-space())=16]'
+        )
+
+        return account_number.text
+
+    def get_account_id(self, index=0):
+        """Получает ID счета по индексу карточки"""
+        card = self.find_elements("account_card")[index]
+        testid = card.get_attribute("data-testid")
+        return testid.replace("account-card-", "")
+
     def delete_account(self, account_id: str):
         """Удаляет счет по ID"""
         delete_selector = f'[data-testid="delete-button-{account_id}"]'
@@ -101,6 +120,11 @@ class AccountsPage(BasePage):
         details_selector = f'[data-testid="details-button-{account_id}"]'
         self.click_element(details_selector)
         self.wait_for_loading_to_complete()
+
+    def get_balance_from_card(self, card_text):
+        """Возвращает баланс из карточки счёта как float"""
+        match = re.search(r'\$([\d,]+\.\d{2})', card_text)
+        return float(match.group(1).replace(',', '')) if match else None
 
     # --------------------------------------------------------------------
     # Проверки состояния
